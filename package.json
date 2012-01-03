@@ -1,0 +1,20 @@
+{
+  "author": "projectmoon",
+  "name": "nmud",
+  "description": "The node.js MUD engine",
+  "version": "0.0.0",
+  "homepage": "www.agnos.is",
+  "repository": {
+    "url": ""
+  },
+  "main": "mud",
+  "bin": "nmud",
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "dependencies": {
+    "node-uuid": "",
+    "compose": ""
+  },
+  "devDependencies": {}
+}

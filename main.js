@@ -5,3 +5,5 @@ var player = factory.createPlayer(null, {
 });
 
 player.command('eat the chicken');
+
+var protos = require('./protos');

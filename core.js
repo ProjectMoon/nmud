@@ -1,44 +1,45 @@
- var uuid, forEach, util, compose, events; uuid = require('node-uuid'),
-  util = require('util'),
-  compose = require('compose'),
-  events = require('events');
+var uuid = require('node-uuid'),
+	util = require('util'),
+	compose = require('compose'),
+	events = require('events');
 
-forEach = Array.prototype.forEach;
+var forEach = Array.prototype.forEach;
 
 function MUDObject() {
-  this.memid = uuid();
+	this.memid = uuid();
 }
 
 util.inherits(MUDObject, events.EventEmitter);
 
 MUDObject.prototype.mixin = function() {
-  compose.apply(this, arguments);
+	compose.apply(this, arguments);
 }
 
 exports.createObject = function() {
-  var _a, trait, _b, obj, traits, eventName; obj = new MUDObject;
-  traits = Array.prototype.slice.call(arguments);
-
-  for(_a = 0, _b = traits.length; _a < _b; _a++) { trait = traits[_a];
-    obj.mixin(trait);
-    if (typeof trait.events === 'object') {
-      for (eventName in trait.events) {
-        obj.on(eventName, trait.events[eventName]);
-      }
-    }
-  }
-
-  obj._traits = traits;
-  obj.is = function(trait) {
-    var _a, arg, _b, hasAllTraits; hasAllTraits = true;
-
-    for(_a = 0, _b = arguments.length; _a < _b; _a++) { arg = arguments[_a];
-      hasAllTraits = this._traits.indexOf(arg) !== -1;
-      if (!hasAllTraits) return false;
-    }
-
-    return true;
-  };
-
-  return obj;
+	var obj = new MUDObject;
+	var traits = Array.prototype.slice.call(arguments);
+		
+	traits.forEach(function(trait) {
+		obj.mixin(trait);
+		if (typeof trait.events === 'object') {
+			for (var eventName in trait.events) {
+				obj.on(eventName, trait.events[eventName]);
+			}
+		}
+	});
+	
+	obj._traits = traits;
+	obj.is = function(trait) {
+		var hasAllTraits = true;
+		
+		for (var c = 0; c < arguments.length; c++) {
+			var arg = arguments[c];
+			hasAllTraits = @_traits.indexOf(arg) !== -1;
+			if (!hasAllTraits) return false;
+		}
+		
+		return true;
+	};
+	
+	return obj;
 }

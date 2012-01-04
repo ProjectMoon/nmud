@@ -52,3 +52,5 @@ exports.createObject = function() {
 	
 	return obj;
 }
+
+exports.MUDObject = MUDObject;

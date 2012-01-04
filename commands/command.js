@@ -1,4 +1,5 @@
 var	util = require('util'),
+	MUDObject = require('../core').MUDObject,
 	protos = require('../protos'),
 	traits = require('../traits');
 
@@ -217,14 +218,26 @@ Command.prototype.analyze = function(parsed, context, callback) {
 		}
 	}
 	else if (this.cascade === 'LTR') {
-		return process.nextTick(function() {
-			callback(new Error('LTR cascade not yet supported'));
-		});
+		try {
+			var variables = parseForm(this.form).variables;
+			var analyzed = analyzeLTRCascade(parsed, scope, this.types, variables);
+		}
+		catch (e) {
+			return process.nextTick(function() {
+				callback(e);
+			});
+		}
 	}
 	else if (this.cascade === 'RTL') {
-		return process.nextTick(function() {
-			callback(new Error('RTL cascade not yet supported'));
-		});
+		try {
+			var variables = parseForm(this.form).variables;
+			var analyzed = analyzeRTLCascade(parsed, scope, this.types, variables);
+		}
+		catch (e) {
+			return process.nextTick(function() {
+				callback(e);
+			});
+		}
 	}
 	else {
 		var self = this;
@@ -270,6 +283,76 @@ function analyzeNoCascade(parsed, scope, dataTypes) {
 		}
 		
 		analyzed[sanitizeVariable(variable)] = obj;
+	}
+	
+	return analyzed;
+}
+
+function analyzeLTRCascade(parsed, scope, dataTypes, variables) {
+	var analyzed = {};
+	for (var c = 0; c < variables.length; c++) {
+		if (!(scope instanceof MUDObject) || !scope.is(traits.Container)) {
+			throw new Error('a cascaded scope did not have the Container trait or was not a MUDObject.');
+		}
+		
+		var variable = variables[c];
+		if (typeof dataTypes !== 'undefined') {
+			var type = dataTypes[sanitizeVariable(variable)];
+		}
+		
+		//resolve mud objects based on data type. text is the default.
+		if (typeof type !== 'undefined') {
+			if (type === 'any') {
+				var obj = scope.find(parsed[variable]);
+			}
+			else if (type !== 'text') {
+				var obj = scope.find(parsed[variable], type);
+			}
+			else {
+				var obj = parsed[variable];
+			}
+		}
+		else {
+			var obj = parsed[variable];
+		}
+		
+		analyzed[sanitizeVariable(variable)] = obj;
+		scope = obj;
+	}
+	
+	return analyzed;
+}
+
+function analyzeRTLCascade(parsed, scope, dataTypes, variables) {
+	var analyzed = {};
+	for (var c = variables.length - 1; c >= 0; c--) {
+		if (!(scope instanceof MUDObject) || !scope.is(traits.Container)) {
+			throw new Error('a cascaded scope did not have the Container trait or was not a MUDObject.');
+		}
+		
+		var variable = variables[c];
+		if (typeof dataTypes !== 'undefined') {
+			var type = dataTypes[sanitizeVariable(variable)];
+		}
+		
+		//resolve mud objects based on data type. text is the default.
+		if (typeof type !== 'undefined') {
+			if (type === 'any') {
+				var obj = scope.find(parsed[variable]);
+			}
+			else if (type !== 'text') {
+				var obj = scope.find(parsed[variable], type);
+			}
+			else {
+				var obj = parsed[variable];
+			}
+		}
+		else {
+			var obj = parsed[variable];
+		}
+		
+		analyzed[sanitizeVariable(variable)] = obj;
+		scope = obj;
 	}
 	
 	return analyzed;

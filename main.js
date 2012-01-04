@@ -12,6 +12,7 @@ player.room = factory.createRoom({
 commands.registerCommand({
 	command: 'optional',
 	form: ':stuff? delim :junk',
+	cascade: 'LTR'
 });
 
 var handler = commands.createHandler(player.commandContext);

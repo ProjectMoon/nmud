@@ -10,12 +10,20 @@ player.room = factory.createRoom({
 	title: 'A room'
 });
 
-var handler = commands.mobileContextHandler(player);
-handler('look', function(err, objs, context) {
-	if (err) return console.log(err.stack);
-	console.log('woop woop', context.executor.name);
+commands.addCommand(new commands.Command({
+	command: 'optional',
+	form: ':stuff? delim :junk',
+	types: {
+		':stuff?': 'text',
+		':junk': 'text'
+	}
+}));
+
+var handler = commands.createHandler(player.commandContext);
+
+handler.on('optional', function(objs, context) {
+	console.log('stuff:', objs.stuff);
+	console.log('junk:', objs.junk);
 });
 
-handler.on('look', function(err, objs, context) {
-	//...?
-});
+handler('optional delim doop');

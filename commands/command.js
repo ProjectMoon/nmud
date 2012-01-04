@@ -1,5 +1,4 @@
-var	events = require('events'),
-	util = require('util'),
+var	util = require('util'),
 	protos = require('../protos'),
 	traits = require('../traits');
 
@@ -25,7 +24,29 @@ function Command(opts) {
 	}
 }
 
-util.inherits(Command, events.EventEmitter);
+function createValidationRegex(form) {
+	var tokens = form.split(' ');
+	var regex = '';
+	
+	tokens.forEach(function(token) {
+		if (token[0] === ':' && token.slice(-1) === '?') {
+			//optional variable
+			regex += '.*';
+		}
+		else if (token[0] === ':') {
+			//required variable
+			regex += '[\\w\\d]*';
+		}
+		else {
+			//delimiter
+			regex += token;
+		}
+		
+		regex += '\\s+';
+	});
+	
+	return regex.substring(0, regex.length - 3); //remove the last \s.
+}
 
 function parseForm(form) {
 	if (form) {
@@ -55,6 +76,10 @@ function parseForm(form) {
 	}
 }
 
+function sanitizeVariable(variable) {
+	return variable.replace(/[:\?]/g, '');
+}
+
 Command.prototype.parse = function(text, callback) {
 	text = text.trim();
 	var parsedForm = parseForm(this.form);
@@ -63,9 +88,8 @@ Command.prototype.parse = function(text, callback) {
 	
 	//make sure command is in proper form
 	if (this.form) {
-		var regex = (this.command + ' ' + this.form).replace(/:\w*/g, '[\\w\\d]*');
-		regex = regex.replace(/\s/g, '\\s+');
-		
+		var regex = createValidationRegex(this.form);
+		console.log(regex);
 		if (text.match(regex) === null) {
 			return process.nextTick(function() {
 				callback(new Error('text does not match command form'));
@@ -107,12 +131,20 @@ Command.prototype.parse = function(text, callback) {
 				currParsedToken += token + ' ';
 			}
 			else {
-				if (currParsedToken === '') {
+				//slice check against ? is for optional variables, e.g., :stuff?
+				if (currParsedToken === '' && variables[vIndex].slice(-1) !== '?') {
 					return process.nextTick(function() {
 						callback(new Error('missing value for variable ' + variables[vIndex]));
 					});
 				}
-				parsed[variables[vIndex]] = currParsedToken.trim();
+				
+				if (currParsedToken === '' && variables[vIndex].slice(-1) === '?') {
+					parsed[variables[vIndex]] = null;
+				}
+				else {			
+					parsed[variables[vIndex]] = currParsedToken.trim();
+				}
+				
 				currParsedToken = '';
 				vIndex++;
 				dIndex++;
@@ -233,7 +265,7 @@ function analyzeNoCascade(parsed, scope, dataTypes) {
 		else {
 			var obj = scope.find(parsed[variable]);
 		}
-		analyzed[variable] = obj;
+		analyzed[sanitizeVariable(variable)] = obj;
 	}
 	
 	return analyzed;

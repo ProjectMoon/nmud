@@ -13,15 +13,17 @@ for (var command in builtins) {
 	commandTable[command] = builtins[command];
 }
 
-exports.addCommand = function(command) {
+exports.registerCommand = function(command) {
 	if (command instanceof Command === false) {
-		throw new Error('can only register Command objects.');
+		//in this instance, command would be an object literal
+		//to pass into the Command constructor.
+		command = new Command(command);
 	}
 	
 	commandTable[command.command] = command;
 }
 
-exports.removeCommand = function(commandOrName) {
+exports.deleteCommand = function(commandOrName) {
 	//commandOrName can be the string name of a command, or the command object
 	//itself.
 	if (typeof commandOrName === 'string') {

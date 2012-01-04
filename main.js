@@ -9,10 +9,10 @@ player.room = factory.createRoom({
 	title: 'A room'
 });
 
-commands.addCommand(new commands.Command({
+commands.registerCommand({
 	command: 'optional',
 	form: ':stuff? delim :junk',
-}));
+});
 
 var handler = commands.createHandler(player.commandContext);
 

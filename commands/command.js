@@ -89,7 +89,6 @@ Command.prototype.parse = function(text, callback) {
 	//make sure command is in proper form
 	if (this.form) {
 		var regex = createValidationRegex(this.form);
-		console.log(regex);
 		if (text.match(regex) === null) {
 			return process.nextTick(function() {
 				callback(new Error('text does not match command form'));

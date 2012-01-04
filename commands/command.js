@@ -5,7 +5,7 @@ var	util = require('util'),
 //cascade = LTR, RTL
 //scope = room, self, item-in-room
 //variables = start with :, end with ? for optional maybe
-//variable types = prototypes from protos module, most likely...
+//variable types = prototypes, 'text', or 'any'
 var defaultOpts = {
 	command: null, //ex: 'put'
 	form: null, //ex: ':item in :bag'
@@ -251,11 +251,15 @@ function analyzeNoCascade(parsed, scope, dataTypes) {
 	var analyzed = {};
 	for (var variable in parsed) {
 		if (typeof dataTypes !== 'undefined') {
-			var type = dataTypes[variable];
+			var type = dataTypes[sanitizeVariable(variable)];
 		}
 		
+		//resolve mud objects based on data type. text is the default.
 		if (typeof type !== 'undefined') {
-			if (type !== 'text') {
+			if (type === 'any') {
+				var obj = scope.find(parsed[variable]);
+			}
+			else if (type !== 'text') {
 				var obj = scope.find(parsed[variable], type);
 			}
 			else {
@@ -263,8 +267,9 @@ function analyzeNoCascade(parsed, scope, dataTypes) {
 			}
 		}
 		else {
-			var obj = scope.find(parsed[variable]);
+			var obj = parsed[variable];
 		}
+		
 		analyzed[sanitizeVariable(variable)] = obj;
 	}
 	

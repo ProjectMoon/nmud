@@ -31,6 +31,22 @@ module.exports = function(socket) {
 		events: events,
 		socket: null,
 		
+		connectSocket: function(socket) {
+			this.socket = null; //maybe clean up?
+			this.socket = socket;
+			var self = this;
+			socket.on('data', function(data) {
+				var args = data.toString().trim().split(' ');
+				var cmdData = {
+					command: args[0],
+					args: args.slice[1],
+					string: data.toString().trim()
+				};
+			
+				self.emit('command', cmdData);
+			});			
+		}
+		
 		send: function(data) { 
 			this.socket.write(data + '\r\n');
 		},

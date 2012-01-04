@@ -7,9 +7,18 @@ module.exports = {
 		}
 	},
 	
+	canStore: function(obj) {
+		return true;
+	},
+	
 	add: function(mudObj) {
 		this._checkMemids();
-		this.memids[mudObj.memid] = mudObj;
+		if (this.canStore(mudObj)) {
+			this.memids[mudObj.memid] = mudObj;
+		}
+		else {
+			throw new Error('container cannot store ' + mudObj);
+		}
 	},
 	
 	remove: function(mudObjOrMemid) {

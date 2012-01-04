@@ -44,7 +44,7 @@ Methods:
     reference.
   * `find(name)`: Finds a mud object in the container by name (e.g. "sword").
 
-### Player ###    
+### Player ###
 Use: `traits.Player(socket)`
 
 The Player trait allows the object to be under a player's control. This trait

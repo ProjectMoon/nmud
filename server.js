@@ -2,7 +2,7 @@ var net = require('net'),
 	player = require('./player'),
 	telnode = require('./telnode'),
 	world = require('./world');
-
+        
 var nRoom = world.room({
 	title: 'The North Room',
 	description: 'You are in the north room'

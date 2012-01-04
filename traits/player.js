@@ -1,32 +1,34 @@
+var events = {
+	command: function(data) {
+		console.log('command for', this.name, 'received: ' + data.command);
+	},
+	
+	move: function(room) {
+		this.send(room.title);
+		this.send(room.description);
+	}
+};
+		
 module.exports = function(socket) {
-	var trait = {
-		__init: function(mudObj) {
-			if (socket) {
-				mudObj.socket = socket;
-				socket.on('data', function(data) {
-					var args = data.toString().trim().split(' ');
-					var cmdData = {
-						command: args[0],
-						args: args.slice[1],
-						string: data.toString().trim()
-					};
-				
-					mubObj.emit('command', cmdData);
-				});
-			}
-		},
-		
-		events: {
-			command: function(data) {
-				console.log('command for', this.name, 'received: ' + data.command);
-			},
+	function __init(mudObj) {
+		if (socket) {
+			mudObj.socket = socket;
+			socket.on('data', function(data) {
+				var args = data.toString().trim().split(' ');
+				var cmdData = {
+					command: args[0],
+					args: args.slice[1],
+					string: data.toString().trim()
+				};
 			
-			move: function(room) {
-				this.send(room.title);
-				this.send(room.description);
-			}
-		},
-		
+				mubObj.emit('command', cmdData);
+			});
+		}
+	}
+	
+	var trait = {
+		__init: __init,
+		events: events,
 		socket: null,
 		
 		send: function(data) { 
@@ -42,7 +44,7 @@ module.exports = function(socket) {
 			};
 			
 			this.emit('command', cmdData);
-		}
+		},
 	};
 	
 

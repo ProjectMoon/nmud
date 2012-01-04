@@ -1,14 +1,20 @@
 var	core = require('./core'),
-	protos = require('./protos');
+	protos = require('./protos'),
+	traits = require('./traits');
 	
 exports.createRoom = function(roomProps) {
-	return mud.createObject(protos.Container, protos.Room, roomProps);
+	return core.createObject(traits.Container, protos.Room, roomProps);
 };
 
+exports.createMobile = function(mobProps) {
+	return core.createObject(protos.Mobile, mobProps);
+}
+
 exports.createPlayer = function(socket, playerProps) {
-	var player = core.createObject(protos.Mobile, protos.Player, playerProps);
+	var player = core.createObject(protos.Mobile, traits.Player(socket), playerProps);
 	player.socket = socket;
 
+	/*
 	if (socket) {
 		socket.on('data', function(data) {
 			var args = data.toString().trim().split(' ');
@@ -21,6 +27,6 @@ exports.createPlayer = function(socket, playerProps) {
 			player.emit('command', cmdData);
 		});
 	}
-	
+	*/
 	return player;
 };

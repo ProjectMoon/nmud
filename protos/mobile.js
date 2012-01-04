@@ -1,4 +1,7 @@
 module.exports = {
+	get commandContext() {
+		return { room: this.room, executor: this };
+	},	
 	name: '',
 	room: null,
 	

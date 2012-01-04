@@ -11,21 +11,26 @@ function MUDObject() {
 
 util.inherits(MUDObject, events.EventEmitter);
 
-MUDObject.prototype.mixin = function() {
-	compose.apply(this, arguments);
+MUDObject.prototype.mixin = function(trait) {
+	compose.call(this, trait);
+	if (typeof trait.events === 'object') {
+		for (var eventName in trait.events) {
+			this.on(eventName, trait.events[eventName]);
+		}
+	}	
+	
+	if (typeof trait.__init !== 'undefined') {
+		trait.__init(this);
+	}
 }
 
 exports.createObject = function() {
 	var obj = new MUDObject;
 	var traits = Array.prototype.slice.call(arguments);
+	var __init;
 		
 	traits.forEach(function(trait) {
 		obj.mixin(trait);
-		if (typeof trait.events === 'object') {
-			for (var eventName in trait.events) {
-				obj.on(eventName, trait.events[eventName]);
-			}
-		}
 	});
 	
 	obj._traits = traits;
@@ -34,7 +39,7 @@ exports.createObject = function() {
 		
 		for (var c = 0; c < arguments.length; c++) {
 			var arg = arguments[c];
-			hasAllTraits = @_traits.indexOf(arg) !== -1;
+			hasAllTraits = this._traits.indexOf(arg) !== -1;
 			if (!hasAllTraits) return false;
 		}
 		

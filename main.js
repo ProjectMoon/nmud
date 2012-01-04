@@ -10,18 +10,12 @@ player.room = factory.createRoom({
 	title: 'A room'
 });
 
-
-var look = new commands.Command({
-	command: 'look',
-	handler: function(objs, context, callback) {
-		console.log('lookin\' sharp, ' + context.executor.name);
-	}
+var handler = commands.mobileContextHandler(player);
+handler('look', function(err, objs, context) {
+	if (err) return console.log(err.stack);
+	console.log('woop woop', context.executor.name);
 });
 
-var handler = look.mobileContextHandler(player);
-handler('look', function(err) {
-	if (err) console.log(err.stack);
+handler.on('look', function(err, objs, context) {
+	//...?
 });
-
-
-//player.move({});

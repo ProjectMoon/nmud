@@ -1,7 +1,7 @@
 var	events = require('events'),
 	util = require('util'),
-	protos = require('./protos'),
-	traits = require('./traits');
+	protos = require('../protos'),
+	traits = require('../traits');
 
 //cascade = LTR, RTL
 //scope = room, self, item-in-room
@@ -52,49 +52,6 @@ function parseForm(form) {
 			variables: [],
 			delims: []
 		};
-	}
-}
-
-Command.prototype.staticContextHandler = function(context) {
-	if (typeof context.room === 'undefined' || typeof context.executor === 'undefined') {
-		throw new Error('context must have room and executor properties.');
-	}
-	
-	if (!context.room.is(protos.Room)) {
-		throw new Error('context.room dose not have the Room prototype');
-	}
-	//(mostly) immutable clone of this command object.
-	var self = {};
-	for (prop in this) self[prop] = this[prop];
-	
-	return function(text, callback) {
-		self.parse(text, function(err, parsed) {
-			if (err) return callback(err);
-			self.analyze(parsed, context, function(err, analyzed) {
-				if (err) return callback(err);
-				self.handle(analyzed, context, callback);
-			});
-		});
-	}
-}
-
-Command.prototype.mobileContextHandler = function(mob) {
-	if (!mob.is(protos.Mobile)) {
-		throw new Error('object does not have the Mobile prototype.');
-	}
-	
-	//(mostly) immutable clone of this command object.
-	var self = {};
-	for (prop in this) self[prop] = this[prop];
-	
-	return function(text, callback) {
-		self.parse(text, function(err, parsed) {
-			if (err) return callback(err);
-			self.analyze(parsed, mob.commandContext, function(err, analyzed) {
-				if (err) return callback(err);
-				self.handle(analyzed, mob.commandContext, callback);
-			});
-		});
 	}
 }
 
@@ -246,15 +203,16 @@ Command.prototype.analyze = function(parsed, context, callback) {
 	}
 }
 
-Command.prototype.handle = function(analyzed, context, callback) {
-	if (this.handler) {
-		this.handler(analyzed, context, callback);
+Command.prototype.handle = function(analyzed, context, handler) {
+	if (typeof handler === 'undefined') {
+		var handler = this.handler;
 	}
-	else {
-		return process.nextTick(function() {
-			callback('No command handler present for ' + this.command);
-		});
+	
+	if (typeof handler !== 'function') {
+		throw new Error('handler must be a function.');
 	}
+	
+	handler(null, analyzed, context);
 }
 
 function analyzeNoCascade(parsed, scope, dataTypes) {

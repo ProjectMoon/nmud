@@ -1,6 +1,5 @@
 var uuid = require('node-uuid'),
 	util = require('util'),
-	compose = require('compose'),
 	events = require('events');
 
 var forEach = Array.prototype.forEach;
@@ -12,7 +11,12 @@ function MUDObject() {
 util.inherits(MUDObject, events.EventEmitter);
 
 MUDObject.prototype.mixin = function(trait) {
-	compose.call(this, trait);
+	for (var prop in trait) {
+		if (prop !== 'events' && prop !== '__init') {
+			var desc = Object.getOwnPropertyDescriptor(trait, prop);
+			Object.defineProperty(this, prop, desc);
+		}
+	}
 	if (typeof trait.events === 'object') {
 		for (var eventName in trait.events) {
 			this.on(eventName, trait.events[eventName]);

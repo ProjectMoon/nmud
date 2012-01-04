@@ -10,6 +10,7 @@ var	events = require('events'),
 var defaultOpts = {
 	command: null, //ex: 'put'
 	form: null, //ex: ':item in :bag'
+	handler: null,
 	cascade: 'none',
 	scope: 'room',
 	variables: {
@@ -30,23 +31,31 @@ function Command(opts) {
 util.inherits(Command, events.EventEmitter);
 
 function parseForm(form) {
-	var tokens = form.trim().split(' ');
-	var variables = [];
-	var delims = [];
-	
-	tokens.forEach(function(token) {
-		if (token.indexOf(':') === 0) {
-			variables.push(token);
-		}
-		else {
-			delims.push(token);
-		}
-	});
-	
-	return {
-		variables: variables,
-		delims: delims
-	};
+	if (form) {
+		var tokens = form.trim().split(' ');
+		var variables = [];
+		var delims = [];
+		
+		tokens.forEach(function(token) {
+			if (token.indexOf(':') === 0) {
+				variables.push(token);
+			}
+			else {
+				delims.push(token);
+			}
+		});
+		
+		return {
+			variables: variables,
+			delims: delims
+		};
+	}
+	else {
+		return {
+			variables: [],
+			delims: []
+		};
+	}
 }
 
 Command.prototype.staticContextHandler = function(context) {
@@ -66,7 +75,7 @@ Command.prototype.staticContextHandler = function(context) {
 			if (err) return callback(err);
 			self.analyze(parsed, context, function(err, analyzed) {
 				if (err) return callback(err);
-				callback(null, analyzed);
+				self.handle(analyzed, context, callback);
 			});
 		});
 	}
@@ -86,29 +95,49 @@ Command.prototype.mobileContextHandler = function(mob) {
 			if (err) return callback(err);
 			self.analyze(parsed, mob.commandContext, function(err, analyzed) {
 				if (err) return callback(err);
-				callback(null, analyzed);
+				self.handle(analyzed, mob.commandContext, callback);
 			});
 		});
 	}
 }
 
 Command.prototype.parse = function(text, callback) {
+	text = text.trim();
 	var parsedForm = parseForm(this.form);
 	var variables = parsedForm.variables;
 	var delims = parsedForm.delims;
 	
-	//regex check makes sure command is in proper form
-	var regex = (this.command + ' ' + this.form).replace(/:\w*/g, '[\\w\\d]*');
-	regex = regex.replace(/\s/g, '\\s+');
-	
-	if (text.match(regex) === null) {
-		return process.nextTick(function() {
-			callback(new Error('text does not match command form'));
-		});
+	//make sure command is in proper form
+	if (this.form) {
+		var regex = (this.command + ' ' + this.form).replace(/:\w*/g, '[\\w\\d]*');
+		regex = regex.replace(/\s/g, '\\s+');
+		
+		if (text.match(regex) === null) {
+			return process.nextTick(function() {
+				callback(new Error('text does not match command form'));
+			});
+		}
+	}
+	else {
+		//check for formless commands (i.e. they expect a single word)
+		if (text === this.command) {
+			return process.nextTick(function() {
+				callback(null, {});
+			});
+		}
+		else {
+			return process.nextTick(function() {
+				callback(new Error('text does not match command form'));
+			});
+		}
 	}
 	
 	//no variables? no problem.
-	if (variables.length === 0) return {};
+	if (variables.length === 0) {
+		return process.nextTick(function() {
+			callback(null, {});
+		});
+	}
 	
 	//now the actual parsing.
 	var tokens = text.trim().split(' ').slice(1); //slice removes initial token.
@@ -177,6 +206,11 @@ Command.prototype.analyze = function(parsed, context, callback) {
 			break;
 	}
 	
+	if (!scope) {
+		return process.nextTick(function() {
+			callback(new Error('no scope present.'));
+		});
+	}
 	if (!scope.is(traits.Container)) {
 		return process.nextTick(function() {
 			callback(new Error('scope must have the Container trait.'));
@@ -198,18 +232,29 @@ Command.prototype.analyze = function(parsed, context, callback) {
 	}
 	else if (this.cascade === 'LTR') {
 		return process.nextTick(function() {
-			callback(new Error('LTR cascade not yet supported');
+			callback(new Error('LTR cascade not yet supported'));
 		});
 	}
 	else if (this.cascade === 'RTL') {
 		return process.nextTick(function() {
-			callback(new Error('RTL cascade not yet supported');
+			callback(new Error('RTL cascade not yet supported'));
 		});
 	}
 	else {
 		var self = this;
 		return process.nextTick(function() {
 			callback(new Error('unrecognized cascade type ' + self.cascade));
+		});
+	}
+}
+
+Command.prototype.handle = function(analyzed, context, callback) {
+	if (this.handler) {
+		this.handler(analyzed, context, callback);
+	}
+	else {
+		return process.nextTick(function() {
+			callback('No command handler present for ' + this.command);
 		});
 	}
 }
@@ -223,3 +268,6 @@ function analyzeNoCascade(parsed, scope) {
 	
 	return analyzed;
 }
+
+//exports
+exports.Command = Command;

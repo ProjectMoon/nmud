@@ -1,16 +1,8 @@
-module.exports = {
-	look: {
-		":name": function(mob) {
-			console.log(this.name + ' looking at ' + JSON.stringify(mob));
-		},
-		
-		"": function() {
-			console.log('looking at nothing');
-		}
-	},
-	get: {
-		":item from from :thing": function() {},
-		":item from :thing": function() {},
-		":item :thing": function() {},
+var commands = require('./commands');
+
+var look = new Command({
+	command: 'look',
+	handler: function(objs, context, callback) {
+		console.log('lookin\' sharp, ' + context.executor.name);
 	}
-};
+});

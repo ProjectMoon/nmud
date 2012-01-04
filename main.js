@@ -1,22 +1,27 @@
-var factory = require('./factory');
+
+var factory = require('./factory'),
+	commands = require('./commands');
 	
 var player = factory.createPlayer(null, {
 	name: 'Derp'
 });
 
-player.command('eat the chicken');
+player.room = factory.createRoom({
+	title: 'A room'
+});
 
-var protos = require('./protos');
 
-var trait = {
-	__init: function(mudObj) {
-		mudObj.test = 5;
-	},
-	stuff: 10
-}
+var look = new commands.Command({
+	command: 'look',
+	handler: function(objs, context, callback) {
+		console.log('lookin\' sharp, ' + context.executor.name);
+	}
+});
 
-var obj = require('./core').createObject(trait);
+var handler = look.mobileContextHandler(player);
+handler('look', function(err) {
+	console.log(err);
+});
 
-console.log(obj.stuff);
-console.log(obj.test);
-console.log(obj.is(trait));
+
+//player.move({});

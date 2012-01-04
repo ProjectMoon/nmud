@@ -45,7 +45,7 @@ module.exports = function(socket) {
 			
 				self.emit('command', cmdData);
 			});			
-		}
+		},
 		
 		send: function(data) { 
 			this.socket.write(data + '\r\n');

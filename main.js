@@ -9,17 +9,14 @@ player.room = factory.createRoom({
 	title: 'A room'
 });
 
-commands.registerCommand({
-	command: 'optional',
-	form: ':stuff? delim :junk',
-	cascade: 'LTR'
-});
+player.room.add(player);
 
 var handler = commands.createHandler(player.commandContext);
+handler.defaultAll();
 
 handler.on('optional', function(objs, context) {
 	console.log('stuff:', objs.stuff);
 	console.log('junk:', objs.junk);
 });
 
-handler('optional asdf delim doop');
+handler('look Derp');

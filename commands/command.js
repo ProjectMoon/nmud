@@ -153,12 +153,18 @@ Command.prototype.parse = function(text, callback) {
 	}
 	
 	if (vIndex < variables.length) {
-		if (currParsedToken === '') {
+		if (currParsedToken === '' && variables[vIndex].slice(-1) !== '?') {
 			return process.nextTick(function() {
 				callback(new Error('missing value for variable ' + variables[vIndex]));
 			});
 		}
-		parsed[variables[vIndex]] = currParsedToken.trim();
+		
+		if (currParsedToken === '' && variables[vIndex].slice(-1) === '?') {
+			parsed[variables[vIndex]] = null;
+		}
+		else {			
+			parsed[variables[vIndex]] = currParsedToken.trim();
+		}
 	}
 	
 	process.nextTick(function() {
@@ -264,7 +270,7 @@ function analyzeNoCascade(parsed, scope, dataTypes) {
 	for (var variable in parsed) {
 		if (typeof dataTypes !== 'undefined') {
 			var type = dataTypes[sanitizeVariable(variable)];
-		}
+		}	
 		
 		//resolve mud objects based on data type. text is the default.
 		if (typeof type !== 'undefined') {

@@ -32,7 +32,7 @@ module.exports = {
 		}
 	},
 	
-	find: function(name) {
+	find: function(name, type) {
 		this._checkMemids();
 		
 		var highestScore = 0;
@@ -43,8 +43,16 @@ module.exports = {
 			var score = string_score(mudObj.name, name);
 			
 			if (score != 0 && score > highestScore) {
-				foundObj = mudObj;
-				highestScore = score;
+				if (typeof type !== 'undefined') {
+					if (mubObj.is(type)) {
+						foundObj = mudObj;
+						highestScore = score;
+					}
+				}
+				else {
+					foundObj = mudObj;
+					highestScore = score;
+				}
 			}
 		}
 		

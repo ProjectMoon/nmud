@@ -12,10 +12,7 @@ var defaultOpts = {
 	form: null, //ex: ':item in :bag'
 	handler: null,
 	cascade: 'none',
-	scope: 'room',
-	variables: {
-		':something': 'text'
-	}
+	scope: 'room'
 };
 
 function Command(opts) {
@@ -211,6 +208,7 @@ Command.prototype.analyze = function(parsed, context, callback) {
 			callback(new Error('no scope present.'));
 		});
 	}
+	
 	if (!scope.is(traits.Container)) {
 		return process.nextTick(function() {
 			callback(new Error('scope must have the Container trait.'));
@@ -219,7 +217,7 @@ Command.prototype.analyze = function(parsed, context, callback) {
 		
 	if (this.cascade === 'none') {
 		try {
-			var analyzed = analyzeNoCascade(parsed, scope);
+			var analyzed = analyzeNoCascade(parsed, scope, this.types);
 			return process.nextTick(function() {
 				callback(null, analyzed);
 			});
@@ -259,10 +257,24 @@ Command.prototype.handle = function(analyzed, context, callback) {
 	}
 }
 
-function analyzeNoCascade(parsed, scope) {
+function analyzeNoCascade(parsed, scope, dataTypes) {
 	var analyzed = {};
 	for (var variable in parsed) {
-		var obj = scope.find(parsed[variable]);
+		if (typeof dataTypes !== 'undefined') {
+			var type = dataTypes[variable];
+		}
+		
+		if (typeof type !== 'undefined') {
+			if (type !== 'text') {
+				var obj = scope.find(parsed[variable], type);
+			}
+			else {
+				var obj = parsed[variable];
+			}
+		}
+		else {
+			var obj = scope.find(parsed[variable]);
+		}
 		analyzed[variable] = obj;
 	}
 	

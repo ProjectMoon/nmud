@@ -20,7 +20,7 @@ var look = new commands.Command({
 
 var handler = look.mobileContextHandler(player);
 handler('look', function(err) {
-	console.log(err);
+	if (err) console.log(err.stack);
 });
 
 

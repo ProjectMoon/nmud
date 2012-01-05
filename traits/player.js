@@ -1,72 +1,30 @@
-var events = {
-	command: function(data) {
-		console.log('command for', this.name, 'received: ' + data.command);
+module.exports = {
+	events: {
+		command: function(data) {
+			//...?
+		},
+		
+		move: function(room) {
+			//...?
+		}
+	},
+				
+	send: function(data) { 
+		this.emit('out', data);
 	},
 	
-	move: function(room) {
-		//...?
+	sendInvalid: function(data) {
+		this.emit('invalid', data);
+	},
+	
+	command: function(text) {
+		var args = text.trim().split(' ');
+		var cmdData = {
+			command: args[0],
+			args: args.slice[1],
+			string: text.trim()
+		};
+		
+		this.emit('command', cmdData);
 	}
 };
-		
-module.exports = function(socket) {
-	function __init(mudObj) {
-		if (socket) {
-			mudObj.socket = socket;
-			socket.on('data', function(data) {
-				var args = data.toString().trim().split(' ');
-				var cmdData = {
-					command: args[0],
-					args: args.slice[1],
-					string: data.toString().trim()
-				};
-			
-				mubObj.emit('command', cmdData);
-			});
-		}
-	}
-	
-	var trait = {
-		__init: __init,
-		events: events,
-		socket: null,
-		
-		connectSocket: function(socket) {
-			this.socket = null; //maybe clean up?
-			this.socket = socket;
-			var self = this;
-			socket.on('data', function(data) {
-				var args = data.toString().trim().split(' ');
-				var cmdData = {
-					command: args[0],
-					args: args.slice[1],
-					string: data.toString().trim()
-				};
-			
-				self.emit('command', cmdData);
-			});			
-		},
-		
-		send: function(data) { 
-			this.emit('out', data);
-		},
-		
-		sendInvalid: function(data) {
-			this.emit('invalid', data);
-		},
-		
-		command: function(text) {
-			var args = text.trim().split(' ');
-			var cmdData = {
-				command: args[0],
-				args: args.slice[1],
-				string: text.trim()
-			};
-			
-			this.emit('command', cmdData);
-		},
-	};
-	
-
-	
-	return trait;
-}

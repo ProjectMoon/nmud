@@ -60,7 +60,7 @@ exports.createStaticHandler = function(context) {
 		var cmdToken = text.split(' ')[0];
 		
 		if (cmdToken in commandTable === false) {
-			emitter.emit('error', new Error('command "' + cmdToken + '" not in command table.'));
+			return emitter.emit('error', new Error('command "' + cmdToken + '" not in command table.'));
 		}
 		
 		var command = commandTable[cmdToken];
@@ -115,7 +115,7 @@ exports.createMobileHandler = function(mob) {
 		var cmdToken = text.split(' ')[0];
 		
 		if (cmdToken in commandTable === false) {
-			emitter.emit('error', new Error('command "' + cmdToken + '" not in command table.'));
+			return emitter.emit('error', new Error('command "' + cmdToken + '" not in command table.'));
 		}
 		
 		var command = commandTable[cmdToken];

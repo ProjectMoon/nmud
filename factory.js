@@ -10,6 +10,6 @@ exports.createMobile = function(mobProps) {
 	return core.createObject(protos.Mobile, mobProps);
 }
 
-exports.createPlayer = function(socket, playerProps) {
-	return core.createObject(protos.Mobile, traits.Player(socket), playerProps);
+exports.createPlayer = function(playerProps) {
+	return core.createObject(protos.Mobile, traits.Player, playerProps);
 };

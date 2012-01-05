@@ -1,9 +1,10 @@
 var rl = require('readline'),
+	transports = require('./transports'),
 	factory = require('./factory'),
 	world = require('./world'),
 	commands = require('./commands');
 	
-var player = factory.createPlayer(null, {
+var player = factory.createPlayer({
 	name: 'Derp'
 });
 
@@ -17,27 +18,13 @@ player.room.add(player);
 var handler = commands.createMobileHandler(player);
 handler.defaultAll();
 
-player.on('invalid', function() {
-	Array.prototype.forEach.call(arguments, function(text) {
-		console.log(text);	
-	});
-	console.log();
-	i.prompt();
+player.on('command', function(cmd) {
+	handler(cmd);
 });
 
-player.on('out', function() {
-	Array.prototype.forEach.call(arguments, function(text) {
-		console.log(text);	
-	});
-	console.log();
-	i.prompt();
+handler.on('error', function(err) {
+	player.emit('invalid', err.message);
 });
 
-var i = rl.createInterface(process.stdin, process.stdout, null);
-
-i.setPrompt('nmud> ');
-
-i.prompt();
-i.on('line', function(text) {
-	handler(text);
-});
+var t = transports.console(player);
+t.connect();

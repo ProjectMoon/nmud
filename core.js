@@ -6,6 +6,7 @@ var forEach = Array.prototype.forEach;
 
 function MUDObject() {
 	this.memid = uuid();
+	this._eventQueue = {};
 }
 
 util.inherits(MUDObject, events.EventEmitter);
@@ -26,6 +27,53 @@ MUDObject.prototype.mixin = function(trait) {
 	if (typeof trait.__init !== 'undefined') {
 		trait.__init(this);
 	}
+}
+
+MUDObject.prototype.queueEvent = function(type, name) {
+	if (!(name in this._eventQueue)) {
+		this._eventQueue[name] = [];
+		this._eventQueue[name].type = type;
+	}
+	else {
+		throw new Error('event "' + name + '" already queued,');
+	}
+	
+	
+	var self = this;
+	var queue = {
+		type: type,
+		name: name,
+		add: function() {
+			self._eventQueue[name].push(Array.prototype.slice.call(arguments));
+		},
+		
+		emit: function() {
+			self.completeEvent(this.name);
+		}
+	};
+	
+	return queue;
+}
+
+MUDObject.prototype.completeEvent = function(nameOrQueue) {
+	//allows passing in of either queue objects or the event name.
+	if (typeof nameOrQueue === 'object') {
+		var name = nameOrQueue.name;
+	}
+	else {
+		var name = nameOrQueue;
+	}
+	
+	if (!(name in this._eventQueue)) {
+		throw new Error('event for "' + name + '" not queued.');
+	}
+	
+	var queuedEvents = this._eventQueue[name];
+	var self = this;
+	queuedEvents.forEach(function(eventArgs) {
+		eventArgs.unshift(queuedEvents.type);
+		self.emit.apply(self, eventArgs);
+	});
 }
 
 exports.createObject = function() {

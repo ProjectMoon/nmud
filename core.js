@@ -38,7 +38,6 @@ MUDObject.prototype.queueEvent = function(type, name) {
 		throw new Error('event "' + name + '" already queued,');
 	}
 	
-	
 	var self = this;
 	var queue = {
 		type: type,

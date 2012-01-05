@@ -1,9 +1,11 @@
 var rl = require('readline'),
+	mongoose = require('mongoose'),
 	transports = require('./transports'),
 	factory = require('./factory'),
 	world = require('./world'),
 	commands = require('./commands');
-	
+
+/*	
 var player = factory.createPlayer({
 	name: 'Derp'
 });
@@ -28,3 +30,25 @@ handler.on('error', function(err) {
 
 var t = transports.console(player);
 t.connect();
+*/
+
+var schemas = require('./schemas');
+
+var room = factory.createRoom({
+	title: 'woop',
+	exits: {
+		north: new mongoose.Types.ObjectId(0)
+	}
+});
+
+mongoose.connect('mongodb://localhost/nmud');
+room.save(function(err) {
+	if (err) console.log(err.stack);
+	mongoose.connection.close();
+});
+
+room.on('woop', function() {
+	console.log("woop");
+});
+
+room.emit('woop');

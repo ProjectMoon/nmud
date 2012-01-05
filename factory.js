@@ -1,9 +1,10 @@
 var	core = require('./core'),
+	schemas = require('./schemas'),
 	protos = require('./protos'),
 	traits = require('./traits');
 	
 exports.createRoom = function(roomProps) {
-	return core.createObject(traits.Container, protos.Room, roomProps);
+	return core.createObject(schemas.Room, protos.Room, traits.Container, roomProps);
 };
 
 exports.createMobile = function(mobProps) {

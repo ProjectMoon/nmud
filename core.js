@@ -4,20 +4,25 @@ var uuid = require('node-uuid'),
 
 var forEach = Array.prototype.forEach;
 
-function MUDObject() {
-	this.memid = uuid();
-	this._eventQueue = {};
-}
-
-util.inherits(MUDObject, events.EventEmitter);
-
-MUDObject.prototype.mixin = function(trait) {
+function mixin(trait) {
 	for (var prop in trait) {
-		if (prop !== 'events' && prop !== '__init') {
-			var desc = Object.getOwnPropertyDescriptor(trait, prop);
-			Object.defineProperty(this, prop, desc);
+		if (typeof this[prop] === 'undefined') {
+			if (prop !== 'events' && prop !== '__init') {
+				var desc = Object.getOwnPropertyDescriptor(trait, prop);
+				
+				if ('get' in desc || 'set' in desc) {
+					Object.defineProperty(this, prop, desc);
+				}
+				else {
+					this[prop] = trait[prop];
+				}
+			}
+		}
+		else {
+			this[prop] = trait[prop];
 		}
 	}
+	
 	if (typeof trait.events === 'object') {
 		for (var eventName in trait.events) {
 			this.on(eventName, trait.events[eventName]);
@@ -29,7 +34,7 @@ MUDObject.prototype.mixin = function(trait) {
 	}
 }
 
-MUDObject.prototype.queueEvent = function(type, name) {
+function queueEvent(type, name) {
 	if (!(name in this._eventQueue)) {
 		this._eventQueue[name] = [];
 		this._eventQueue[name].type = type;
@@ -56,7 +61,7 @@ MUDObject.prototype.queueEvent = function(type, name) {
 	return queue;
 }
 
-MUDObject.prototype.completeEvent = function(nameOrQueue) {
+function completeEvent(nameOrQueue) {
 	//allows passing in of either queue objects or the event name.
 	if (typeof nameOrQueue === 'object') {
 		var name = nameOrQueue.name;
@@ -76,29 +81,62 @@ MUDObject.prototype.completeEvent = function(nameOrQueue) {
 	delete this._eventQueue[name];
 }
 
+function emit() {
+	this._emitter.emit.apply(this, arguments);
+}
+
+function on() {
+	this._emitter.on.apply(this, arguments);
+}
+
+function removeListener() {
+	this._emitter.removeListener.apply(this, arguments);
+}
+
+function is(trait) {
+	var hasAllTraits = true;
+	
+	for (var c = 0; c < arguments.length; c++) {
+		var arg = arguments[c];
+		hasAllTraits = this._traits.indexOf(arg) !== -1;
+		if (!hasAllTraits) return false;
+	}
+	
+	return true;
+}
+	
+
 exports.createObject = function() {
-	var obj = new MUDObject;
 	var traits = Array.prototype.slice.call(arguments);
+	var Schema = traits[0];
+	traits = traits.slice(1);
+	
+	function MUDObject() {
+		this.memid = uuid();
+		this._eventQueue = {};
+		this._emitter = new events.EventEmitter;
+	}
+	
+	MUDObject.prototype = new Schema;
+	var obj = new MUDObject;
+	obj.emit = emit;
+	obj.on = on;
+	obj.removeListener = removeListener;
+	obj.mixin = mixin;
+	obj.queueEvent = queueEvent;
+	obj.completeEvent = completeEvent;
+
 	var __init;
 		
 	traits.forEach(function(trait) {
-		obj.mixin(trait);
+		if (typeof trait !== 'undefined') {
+			obj.mixin(trait);
+		}
 	});
 	
 	obj._traits = traits;
-	obj.is = function(trait) {
-		var hasAllTraits = true;
-		
-		for (var c = 0; c < arguments.length; c++) {
-			var arg = arguments[c];
-			hasAllTraits = this._traits.indexOf(arg) !== -1;
-			if (!hasAllTraits) return false;
-		}
-		
-		return true;
-	};
+	obj._traits.push(Schema);
 	
 	return obj;
 }
 
-exports.MUDObject = MUDObject;

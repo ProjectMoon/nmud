@@ -112,3 +112,10 @@ Events:
 
   * `enter(obj)`: Fired when a mud object enters the room via movement.
   * `exit(obj)`: Fired when a mud object leaves the room via movement.
+
+Design
+======
+Rules of Business Logic:
+
+1. Do not emit any information output events in anything but commands or ticker.
+2. Prototype/Trait events should not do any output.

@@ -23,7 +23,7 @@ module.exports = {
 	
 	remove: function(mudObjOrMemid) {
 		this._checkMemids();
-		if (mudObj.hasOwnProperty('memid')) {
+		if (mudObjOrMemid.hasOwnProperty('memid')) {
 			return delete this.memids[mudObjOrMemid.memid];
 		}
 		else {
@@ -33,6 +33,7 @@ module.exports = {
 	},
 	
 	find: function(name, type) {
+		if (!name) return null;
 		this._checkMemids();
 		
 		var highestScore = 0;

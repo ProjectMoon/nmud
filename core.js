@@ -43,7 +43,9 @@ MUDObject.prototype.queueEvent = function(type, name) {
 		type: type,
 		name: name,
 		add: function() {
-			self._eventQueue[name].push(Array.prototype.slice.call(arguments));
+			forEach.call(arguments, function(arg) {
+				self._eventQueue[name].push(arg);
+			});
 		},
 		
 		emit: function() {
@@ -68,11 +70,10 @@ MUDObject.prototype.completeEvent = function(nameOrQueue) {
 	}
 	
 	var queuedEvents = this._eventQueue[name];
+	queuedEvents.unshift(queuedEvents.type);
 	var self = this;
-	queuedEvents.forEach(function(eventArgs) {
-		eventArgs.unshift(queuedEvents.type);
-		self.emit.apply(self, eventArgs);
-	});
+	this.emit.apply(this, queuedEvents);
+	delete this._eventQueue[name];
 }
 
 exports.createObject = function() {

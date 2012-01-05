@@ -4,8 +4,7 @@ var events = {
 	},
 	
 	move: function(room) {
-		this.send(room.title);
-		this.send(room.description);
+		//...?
 	}
 };
 		
@@ -48,7 +47,11 @@ module.exports = function(socket) {
 		},
 		
 		send: function(data) { 
-			this.socket.write(data + '\r\n');
+			this.emit('out', data);
+		},
+		
+		sendInvalid: function(data) {
+			this.emit('invalid', data);
 		},
 		
 		command: function(text) {

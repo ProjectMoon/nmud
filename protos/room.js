@@ -1,12 +1,16 @@
 module.exports = {
+	id: null,
 	title: '',
 	description: '',
-	north: null,
-	south: null,
-	east: null,
-	west: null,
-	up: null,
-	down: null,
+	
+	exits: {
+		north: null,
+		south: null,
+		east: null,
+		west: null,
+		up: null,
+		down: null
+	},
 	
 	events: {
 		enter: function(obj) {

@@ -4,7 +4,7 @@ var	events = require('events'),
 	Command = require('./command').Command,
 	builtins = require('./builtins'),
 	protos = require('../protos'),
-	schemas = require('../schemas');
+	models = require('../models');
 
 exports.Command = Command;
 
@@ -100,8 +100,8 @@ exports.createStaticHandler = function(context) {
 
 exports.createMobileHandler = function(mob) {
 	var valid = false;
-	for (var schemaName in schemas) {
-		if (schemas[schemaName] === mob.constructor) {
+	for (var schemaName in models) {
+		if (models[schemaName] === mob.constructor) {
 			valid = true;
 			break;
 		}

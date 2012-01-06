@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "node-uuid": "",
-    "mongoose": ""
+    "mongoose": "2.4.9",
+    "async": ""
   },
   "devDependencies": {}
 }

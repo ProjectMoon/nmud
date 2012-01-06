@@ -113,6 +113,8 @@ Events:
   * `enter(obj)`: Fired when a mud object enters the room via movement.
   * `exit(obj)`: Fired when a mud object leaves the room via movement.
 
+
+
 Design
 ======
 Rules of Business Logic:

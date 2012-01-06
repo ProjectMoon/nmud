@@ -1,6 +1,6 @@
 [
 	{
-		"id": 0,
+		"_id": 0,
 		"title": "Sample Room 1",
 		"description": "This is the first sample room.",
 		"exits": {
@@ -8,7 +8,7 @@
 		}
 	},
 	{
-		"id": 1,
+		"_id": 1,
 		"title": "Sample Room 2",
 		"description": "This is the second sample room.",
 		"exits": {

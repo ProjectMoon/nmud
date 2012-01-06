@@ -1,10 +1,15 @@
 var uuid = require('node-uuid'),
+	ObjectId = require('mongoose').Types.ObjectId,
 	util = require('util'),
 	events = require('events');
 
 var forEach = Array.prototype.forEach;
 
-function mixin(trait) {
+function mixin(trait, overwrite) {
+	if (typeof overwrite === 'undefined') {
+		overwrite = true;
+	}
+	
 	for (var prop in trait) {
 		if (typeof this[prop] === 'undefined') {
 			if (prop !== 'events' && prop !== '__init') {
@@ -19,7 +24,9 @@ function mixin(trait) {
 			}
 		}
 		else {
-			this[prop] = trait[prop];
+			if (overwrite) {
+				this[prop] = trait[prop];
+			}
 		}
 	}
 	
@@ -126,3 +133,35 @@ exports.createObject = function() {
 	return obj;
 }
 
+exports.createFromModel = function() {
+	var traits = Array.prototype.slice.call(arguments);
+	var model = traits[0];
+	traits = traits.slice(1);
+	
+	function MUDObject() {
+		this.memid = uuid();
+		this._eventQueue = {};
+	}
+		
+	MUDObject.prototype = model;
+	ensurePrototype(MUDObject);
+	var obj = new MUDObject;
+		
+	traits.forEach(function(trait) {
+		if (typeof trait !== 'undefined') {
+			obj.mixin(trait, false);
+		}
+	});
+	
+	obj._traits = traits;
+	
+	return obj;
+}
+
+exports.ensureObjectId = function(mudObj) {
+	if ('_id' in mudObj) {
+		if (!(mudObj._id instanceof ObjectId)) {
+			mudObj._id = new ObjectId(mudObj._id);
+		}
+	}
+}

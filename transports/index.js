@@ -25,7 +25,7 @@ exports.console = function(player) {
 	
 	function disconnect() {
 		player.removeListener('out', consoleWriter);
-		player.removeListener('invalid', consoleListener);
+		player.removeListener('invalid', consoleWriter);
 		i.close();
 		process.stdin.destroy();
 	}

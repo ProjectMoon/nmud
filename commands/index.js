@@ -3,7 +3,8 @@ var	events = require('events'),
 	MUDObject = require('../core').MUDObject,
 	Command = require('./command').Command,
 	builtins = require('./builtins'),
-	protos = require('../protos');
+	protos = require('../protos'),
+	schemas = require('../schemas');
 
 exports.Command = Command;
 
@@ -98,7 +99,15 @@ exports.createStaticHandler = function(context) {
 }
 
 exports.createMobileHandler = function(mob) {
-	if (!(mob instanceof MUDObject) || !mob.is(protos.Mobile)) {
+	var valid = false;
+	for (var schemaName in schemas) {
+		if (schemas[schemaName] === mob.constructor) {
+			valid = true;
+			break;
+		}
+	}
+	
+	if (!valid || !mob.is(protos.Mobile)) {
 		throw new Error('object must have the Mobile prototype.');
 	}
 	

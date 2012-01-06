@@ -16,4 +16,9 @@ var RoomSchema = new Schema({
 	}
 });
 
+var PlayerSchema = new Schema({
+	name: String
+});
+
 exports.Room = mongoose.model('Room', RoomSchema);
+exports.Player = mongoose.model('Player', PlayerSchema);

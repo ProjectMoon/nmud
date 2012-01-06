@@ -12,5 +12,12 @@ exports.createMobile = function(mobProps) {
 }
 
 exports.createPlayer = function(playerProps) {
-	return core.createObject(protos.Mobile, traits.Player, playerProps);
+	return core.createObject(schemas.Player, protos.Mobile, traits.Player, playerProps);
 };
+
+exports.loadRoom = function(objectID, callback) {
+	schemas.Room.findById(objectID, function(err, room) {
+		if (err) return callback(err);
+		callback(null, room);
+	});
+}

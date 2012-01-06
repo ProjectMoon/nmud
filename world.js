@@ -1,4 +1,7 @@
-var	factory = require('./factory');
+var	factory = require('./factory'),
+	ObjectId = require('mongoose').Types.ObjectId,
+	schemas = require('./schemas');
+
 var theWorld = {};
 
 exports.build = function(world) {
@@ -14,6 +17,10 @@ exports.build = function(world) {
 }
 
 exports.getRoom = function(id) {
+	if (!(id instanceof ObjectId)) {
+		id = new ObjectId(id);
+	}
+	
 	if (!(id in theWorld)) {
 		throw new Error('room id ' + id + ' does not exist in the world.');
 	}
@@ -27,4 +34,17 @@ exports.deleteRoom = function(id) {
 	}
 	
 	return delete theWorld[id];	
+}
+
+exports.load = function(callback) {
+	schemas.Room.find({}, function(err, roomDocs) {
+		if (err) return callback(err);
+		
+		roomDocs.forEach(function(roomData) {
+			var room = factory.createRoom(roomData);
+			theWorld[room._id] = room;
+		});
+		
+		callback(null, theWorld);
+	});
 }

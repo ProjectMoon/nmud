@@ -17,7 +17,9 @@ exports.move = new Command({
 		var direction = objs.direction;
 		var room = context.room;
 		
-		if (!(direction in room.exits)) {
+		//Disallow movement if the exit property does not exist,
+		//or if the property exists, but is null/undefined.
+		if (!(direction in room.exits) || ! room.exits[direction]) {
 			return context.executor.emit('invalid', 'You cannot go ' + direction);
 		}
 		

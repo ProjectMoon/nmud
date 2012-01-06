@@ -81,18 +81,6 @@ function completeEvent(nameOrQueue) {
 	delete this._eventQueue[name];
 }
 
-function emit() {
-	this._emitter.emit.apply(this, arguments);
-}
-
-function on() {
-	this._emitter.on.apply(this, arguments);
-}
-
-function removeListener() {
-	this._emitter.removeListener.apply(this, arguments);
-}
-
 function is(trait) {
 	var hasAllTraits = true;
 	
@@ -104,29 +92,27 @@ function is(trait) {
 	
 	return true;
 }
-	
+
+function ensurePrototype(Schema) {
+	Schema.prototype.is = is;
+	Schema.prototype.mixin = mixin;
+	Schema.prototype.queueEvent = queueEvent;
+	Schema.prototype.completeEvent = completeEvent;
+}
 
 exports.createObject = function() {
 	var traits = Array.prototype.slice.call(arguments);
 	var Schema = traits[0];
+	ensurePrototype(Schema);
 	traits = traits.slice(1);
 	
 	function MUDObject() {
 		this.memid = uuid();
 		this._eventQueue = {};
-		this._emitter = new events.EventEmitter;
 	}
-	
+		
 	MUDObject.prototype = new Schema;
 	var obj = new MUDObject;
-	obj.emit = emit;
-	obj.on = on;
-	obj.removeListener = removeListener;
-	obj.mixin = mixin;
-	obj.queueEvent = queueEvent;
-	obj.completeEvent = completeEvent;
-
-	var __init;
 		
 	traits.forEach(function(trait) {
 		if (typeof trait !== 'undefined') {

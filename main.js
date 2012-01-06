@@ -6,6 +6,11 @@ var rl = require('readline'),
 	commands = require('./commands');
 
 mongoose.connect('mongodb://localhost/nmud');
+
+mongoose.connection.on('error', function(err) {
+	console.log('mongoose error:', err);
+});
+
 world.load(function(err) {
 	var player = factory.createPlayer({ name: 'Derp' });
 	var start = world.getRoom(0);
@@ -22,7 +27,9 @@ world.load(function(err) {
 			mongoose.connection.close();
 			process.exit(0);
 		}
-		handler(cmd);
+		else {
+			handler(cmd);
+		}
 	});
 
 	handler.on('error', function(err) {
